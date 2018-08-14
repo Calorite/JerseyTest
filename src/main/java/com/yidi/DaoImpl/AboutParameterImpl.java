@@ -72,13 +72,15 @@ public class AboutParameterImpl implements AboutParametersDAO {
 		return null;
 	}
 
-	public Parameter insertParametergetID(String paramenter) throws SQLException{
+	public Parameter insertParametergetID(String paramenter,String first,String second) throws SQLException{
 		DBService helper=new DBService();
-		String sql1="INSERT INTO ai_qanda.parameter_tb (paramenter,rank) VALUES (?,0);";
+		String sql1="INSERT INTO ai_qanda.parameter_tb (paramenter, rank, first, second) VALUES (?, '0', ?, ?);";
 
 		Connection conn=helper.getConnection();
 		PreparedStatement statement=conn.prepareStatement(sql1);
 		statement.setString(1, paramenter);
+		statement.setString(2, first);
+		statement.setString(3, second);
 		int rows=statement.executeUpdate();
 		if(rows>0){
 			String sql2="SELECT LAST_INSERT_ID();";

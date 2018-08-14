@@ -31,7 +31,10 @@ import com.yidi.Impl.DBupdate;
 import com.yidi.Impl.Parama;
 import com.yidi.algorithm.Parama2Json;
 import com.yidi.entity.Parameter;
+import com.yidi.entity.ParameterDTO;
+import com.yidi.entity.UpperQuestion;
 import com.yidi.entity.parameInQuestion;
+import com.yidi.interfactoty.AboutQuestionDAO;
 import com.yidi.interfactoty.ParameterService;
 import com.yidi.service.DefaultServiceFactory;
 
@@ -41,7 +44,8 @@ import com.yidi.service.DefaultServiceFactory;
  */
 @Path("myresource")
 public class MyResource {
-
+	DefaultServiceFactory factory=new DefaultServiceFactory();
+	AboutQuestionDAO questiondao=factory.getquestionDao();
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent
 	 * to the client as "text/plain" media type.
@@ -52,6 +56,19 @@ public class MyResource {
 	@Produces(MediaType.TEXT_PLAIN)
 	public void getIt(@Context HttpServletRequest request,@Context HttpServletResponse response) {
 		try {
+			
+			List<UpperQuestion> alllist=AboutQuestionImpl.getAllupperQuesiton();
+			List<UpperQuestion> list1=new ArrayList<>();
+			List<UpperQuestion> list2=new ArrayList<>();
+			for(UpperQuestion up:alllist){
+				if(up.getId().contains("A")){
+					list1.add(up);
+				}else {
+					list2.add(up);
+				}
+			}
+			request.setAttribute("firstlist", list1);
+			request.setAttribute("secondlist", list2);
 			request.getRequestDispatcher("/index.jsp").forward(request, response);
 		} catch (ServletException e) {
 			e.printStackTrace();
@@ -70,7 +87,7 @@ public class MyResource {
 		Set<Parama> parametes;
 		if(text!=null){
 			try {
-				DefaultServiceFactory factory=new DefaultServiceFactory();
+				
 				ParameterService process=factory.getparameterService();
 				DBService helper=new DBService();
 				Map<Integer,Parameter> parametermap=process.getInitialParameters(text,factory.getparameterDao(factory.getDBhelper()));
@@ -159,13 +176,49 @@ public class MyResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)  //接受的参数类型为表单信息
 	@Produces({MediaType.APPLICATION_JSON})
-	public String parametersolution(@FormParam("parameters") String parameters,@FormParam("solutionid") String solutionid) throws SQLException {	
+	public String parametersolution(@FormParam("parameters") String parameters,@FormParam("solutionid") String solutionid,@FormParam("solutionrank") String solutionrank,@FormParam("minset") String minparaset) throws SQLException {	
 		try {
-			String parameStr=parameters.replace("[", "").replace("]", "").replace("\"","");
 			System.out.println(parameters);
-			System.out.println(solutionid);
+			System.out.println(solutionrank);
+			Gson gs=new Gson();
+			String parametersetstr="";
+			String ranksetstr="";
 			String soluid=String.valueOf(DBupdate.getSolutionid(solutionid));
-			DBupdate.InsertSolution(parameStr,soluid);
+			List<ParameterDTO> jsonObjectlist = gs.fromJson(parameters, new TypeToken<List<ParameterDTO>>(){}.getType());
+			if (minparaset!=null) {
+				String minparametrstr=minparaset.replace("]", "").replace("[", "").replace("\"", "");
+				String[] minparameterArr=minparametrstr.split(",");			
+				if (minparameterArr.length>1) {
+					String minparametersetstr="";
+					String minranksetstr="";
+					for(String item:minparameterArr){
+						for(int i=0;i<jsonObjectlist.size();i++){
+							ParameterDTO pdto=jsonObjectlist.get(i);
+							if(item==pdto.getId()){
+								if(i==0){
+									minparametersetstr=pdto.getId();
+									minranksetstr=pdto.getRank();
+								}else {
+									minparametersetstr=minparametersetstr+","+pdto.getId();
+									minranksetstr=minranksetstr+","+pdto.getRank();
+								}
+							}					
+						}
+					}
+					DBupdate.InsertSolution(minparametersetstr,soluid,solutionrank,minranksetstr);
+				}
+			}			
+			for(int i=0;i<jsonObjectlist.size();i++){
+				ParameterDTO pdto=jsonObjectlist.get(i);
+				if(i==0){
+					parametersetstr=pdto.getId();
+					ranksetstr=pdto.getRank();
+				}else {
+					parametersetstr=parametersetstr+","+pdto.getId();
+					ranksetstr=ranksetstr+","+pdto.getRank();
+				}
+			}			
+			DBupdate.InsertSolution(parametersetstr,soluid,solutionrank,ranksetstr);
 			return "1";
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -179,12 +232,14 @@ public class MyResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)  //接受的参数类型为表单信息
 	@Produces({MediaType.APPLICATION_JSON})
-	public String insertnewParameterANDQuestion(@FormParam("newparameter") String parameters,@FormParam("question") String solutionid) throws SQLException {	
+	public String insertnewParameterANDQuestion(@FormParam("newparameter") String parameters,@FormParam("question") String solutionid,@FormParam("first") String firstid,@FormParam("second") String secondid) throws SQLException {	
 		try {
 			Gson gson=new Gson();
+			System.out.println(firstid);
+			System.out.println(secondid);
 			Map<String, String> returnmap=new HashMap<>();
 			AboutParameterImpl paImpl=new AboutParameterImpl();
-			Parameter parater=paImpl.insertParametergetID(parameters);
+			Parameter parater=paImpl.insertParametergetID(parameters,firstid,secondid);
 			int questionid=paImpl.insertQuestionID(solutionid, String.valueOf(parater.getParameterid()),parameters);
 			paImpl.updateParameterquestionid(parater.getParameterid(), questionid);
 			parater.setQuestionid(questionid);

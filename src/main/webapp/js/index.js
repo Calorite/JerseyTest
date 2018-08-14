@@ -9,11 +9,15 @@ var solutionid=0;
 var nowquestionid=0;
 var nownewparameter='';
 var thisnowquestion='';
+var currenttrid=0;
+var minparameterset=[];
 function SelectText(){
 	try{
 		var selecter=window.getSelection().toString();
 		if(selecter!=null&&selecter.trim()!=""){
-			$("#tbe").append("<tr id='"+buttoncount+"'><td><div class='btn-toolbar'><div class='btn-group'><button  class='btn btn-danger' onclick='deletefuc(event);'>删除</button></div><div class='btn-group'><button name='new' class='btn btn-default' onclick='shownewquestion(event);' contenteditable='true'>"+selecter+"</button></div></div></td></tr>");
+			$("#selectoption").remove();
+			//$("#tbe").append("<tr id='tr"+buttoncount+"'><td><div class='btn-toolbar'><div class='btn-group'><button  class='btn btn-danger' onclick='deletefuc(event);'>删除</button></div><div class='btn-group'><button name='new' class='btn btn-default' onclick='shownewquestion(event);' contenteditable='true'>"+selecter+"</button></div><div class='btn-group'><label for='inputtext'>优先级：</label><input type='text' id='inputtext'></div><div class='btn-group'><label for='checkboxid'>最小参数集：</label><input name='check' type='checkbox' onclick='checkfuc(event);'/></div></div></td></tr>");
+			$("#tbe").append("<tr id='tr"+buttoncount+"'><td><div class='btn-toolbar'><div class='btn-group'><button  class='btn btn-danger' onclick='deletefuc(event);'>删除</button></div><div class='btn-group'><button class='btn btn-default' onclick='shownewquestion(event);' contenteditable='true'>"+selecter+"</button></div><div class='btn-group'><label for='inputtext'>优先级：</label><input type='text' id='inputtext'></div><div class='btn-group'><label for='checkboxid'>最小参数集：</label><input name='check' type='checkbox' onclick='checkfuc(event);' /></div></div></div></td></tr>")
 			buttoncount=buttoncount+1;
 		}
 	}catch(err){
@@ -41,13 +45,21 @@ $("#tijiao").on("click",function(){
 			var obj = eval(data);
 			for(j = 0; j < obj.length; j++){
 				item=obj[j];
-				$("#tbe").append("<tr id='"+buttoncount+"'><td><div class='btn-toolbar'><div class='btn-group'><button  class='btn btn-danger' onclick='deletefuc(event);'>删除</button></div><div class='btn-group'><button name='inDB' id='"+item.id+"' questionid='"+item.questionid+"' class='btn btn-default' onclick='showquestion(event);'>"+item.parameter+"</button></div></div></td></tr>");
+				$("#tbe").append("<tr id='tr"+buttoncount+"'><td><div class='btn-toolbar'><div class='btn-group'><button  class='btn btn-danger' onclick='deletefuc(event);'>删除</button></div><div class='btn-group'><button name='inDB' id='"+item.id+"' questionid='"+item.questionid+"' class='btn btn-default' onclick='showquestion(event);'>"+item.parameter+"</button></div><div class='btn-group'><label for='inputtext'>优先级：</label><input type='text' id='inputtext'></div><div class='btn-group'><label for='checkboxid'>最小参数集：</label><input name='check' type='checkbox' onclick='checkfuc(event);' /></div></div></div></td></tr>");
 				buttoncount=buttoncount+1;
 			}
 		}});
 });
 
 
+function checkfuc(event){
+	var thisevent=event;
+	var thisname=event.currentTarget.parentNode.parentNode.childNodes[1].firstChild.name;
+	var thisid=0;
+	thisid=event.currentTarget.parentNode.parentNode.childNodes[1].firstChild.id;
+	minparameterset.push(thisid);
+
+}
 
 function showquestion(event){
 	tagid=event.srcElement.parentNode.parentNode.parentNode.parentNode.id;
@@ -145,16 +157,17 @@ function updateallfuc(event){
 
 function shownewquestion(event){
 	trid=event.srcElement.parentNode.parentNode.parentNode.parentNode.id;
-	nowquestionid=trid;
+	currenttrid=trid.replace('tr','');
+	nowquestionid=trid.replace('tr','');
 	nownewparameter=event.srcElement.innerText;
 	if(newquestionmap[trid]){
 		newquestionmap[trid]=false;
-		$("#newquestion"+trid).remove();
+		$("#newquestion"+trid.replace('tr','')).remove();
 	}else{
-		$("#"+trid).after('<div id=newquestion'+trid+'>'
+		$("#tr"+currenttrid).after('<div id=newquestion'+currenttrid+'>'
 				+'<div class="form-group">'
 				+'<label for="question">问题:</label>'
-				+'<textarea id="question'+trid+'" rows="3" cols="35"></textarea> >'
+				+'<textarea id="question'+trid.replace('tr','')+'" rows="3" cols="35"></textarea> >'
 				+'</div>'
 				+'<button class="btn btn-default" onclick="newques(event)">确定</button>'
 				+'</div>');
@@ -181,22 +194,27 @@ function getnewparemeterid(parameter){
 
 $("#tianjia").on("click",function(){
 	solutiontext=$("#solution").val();
+	var solutionparameterank=$("#youxian").val();
 	var parameterStr="";
 	tb = document.getElementById('tbe');
 	var rows = tb.rows;
 	for (var i=0;i<rows.length;i++) {
 		tdArrid = rows[i].childNodes[0].childNodes[0].childNodes[1].childNodes[0].id;
-		butname=rows[i].childNodes[0].childNodes[0].childNodes[1].childNodes[0].name;
-		if(butname=="inDB"){
-			newparameterlist.push(tdArrid);
-		}
+		var thisrank=rows[i].childNodes[0].childNodes[0].childNodes[2].childNodes[1].value;
+		var m = new Map();
+		m["id"]=tdArrid;
+		m["rank"]=thisrank;
+		//arritem='{"id":"'+tdArrid+'","rank":"'+thisrank+'"}'
+		newparameterlist.push(m);
 	}
 	$.ajax({
 		type : "POST",
 		url : "/JerseyTest/webapi/myresource/putInparametersolution",
 		scriptCharset: "utf-8",
 		data:{parameters:JSON.stringify(newparameterlist),
-			solutionid:solutiontext
+			solutionid:solutiontext,
+			solutionrank:solutionparameterank,
+			minset:JSON.stringify(minparameterset)
 		},
 		success : function (data) {
 			newparameterlist=[];
@@ -205,7 +223,7 @@ $("#tianjia").on("click",function(){
 			}else{
 				alert("添加成功！");
 				location.reload();
-				};
+			};
 		}
 	});
 });
@@ -214,19 +232,25 @@ $("#tianjia").on("click",function(){
 function newques(event){
 	trid=nowquestionid;
 	thisnowquestion=$("#question"+trid).val();
+	var firstquestion=$("#firstselect  option:selected").val();
+	var secondquestion=$("#secondselect  option:selected").val();
 	nownewparameter;
 	$.ajax({
 		type : "POST",
 		url : "/JerseyTest/webapi/myresource/putNewparameter",
 		scriptCharset: "utf-8",
 		data:{newparameter:nownewparameter,
-			question:thisnowquestion
+			question:thisnowquestion,
+			first:firstquestion,
+			second:secondquestion
 		},
 		success : function (data) {
 			$("#question"+trid).remove();
 			if(data=="0"){
 				alert("添加失败！");
 			}else{
+				$("#selectoption").remove();
+				$("#destination").remove();
 				$("#newquestion"+trid).remove();
 				var returndata=eval(data);
 				destinationitem=returndata["parameterIN"];
@@ -247,14 +271,30 @@ function newques(event){
 				destinationstr='</select>'
 					+'<select id="destination"  data-search="Search for options">'
 					parameterid=targetparamearr[0];
-				newparameterlist.push(parameterid);
+				//newparameterlist.push(parameterid);
+				$("#tr"+trid)[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].id=targetparamearr[0];
+				//$("#tr"+trid)[0].childNodes[0].childNodes[0].childNodes[1].name="inDB";
+				tb = document.getElementById('tbe');
+				var rows = tb.rows;
+				for (var i=0;i<rows.length;i++) {
+					intrid=rows[i].id;
+					if(intrid==currenttrid){
+						var thisrank=rows[i].childNodes[0].childNodes[0].childNodes[2].childNodes[1].value;
+						var m = new Map();
+						m["id"]=parameterid;
+						m["rank"]=thisrank;
+						//newparameterlist.push(m);
+						//arritem='{"id":"'+parameterid+'","rank":"'+thisrank+'"}'
+						//newparameterlist.push(arritem);
+					}
+				}			
 				strparam=targetparamearr[1];
 				destinationstr=destinationstr+'<option value="'+parameterid+'">'+strparam+'</option>';
 				divendstr='</select>'
 					+'<button class="btn btn-default" onclick="newquestionparameter(event)">确定</button>'
 					//+'<button class="btn btn-default" onclick="newquestionparameter(event)">确定</button>'
 					+'</div>';
-				$("#"+trid).after(divstr+destinationstr+divendstr);
+				$("#tr"+trid).after(divstr+destinationstr+divendstr);
 				$('#source, #destination').listswap({
 					truncate:true,
 					height:162,

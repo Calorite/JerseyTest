@@ -23,7 +23,7 @@ public class DefaultDaoFactory implements DaoFactory {
 	@Override
 	public AboutQuestionDAO getquestiondao() {
 		// TODO Auto-generated method stub
-		return null;
+		return new AboutQuestionImpl();
 	}
 
 	@Override

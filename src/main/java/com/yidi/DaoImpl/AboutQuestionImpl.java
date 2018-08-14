@@ -1,11 +1,13 @@
 package com.yidi.DaoImpl;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +15,7 @@ import java.util.Map.Entry;
 
 import com.yidi.interfactoty.AboutQuestionDAO;
 import com.yidi.entity.Parameter;
+import com.yidi.entity.UpperQuestion;
 
 
 public class AboutQuestionImpl implements AboutQuestionDAO {
@@ -43,6 +46,24 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 		return 0;
 	}
 
+	public static List<UpperQuestion> getAllupperQuesiton() {
+		String sql="SELECT * FROM ai_qanda.upperquestion_tb;";
+		List<UpperQuestion> quesitonlist=new LinkedList<>();
+		DBService helper=new DBService();
+		ResultSet rs;
+		rs=helper.executeQueryRS(sql, null);
+		try {
+			while(rs.next()){
+				UpperQuestion newone=new UpperQuestion(rs.getString(1),rs.getString(2));
+				quesitonlist.add(newone);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return quesitonlist;
+	}
+	
 	public static boolean updateBundparameter(String parameter,String questionid) {
 		DBService helper=new DBService();
 		String sql="UPDATE ai_qanda.paramenterques_tb SET returnparameter=? WHERE id=?;";

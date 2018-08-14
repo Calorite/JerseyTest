@@ -162,10 +162,11 @@ public class DBupdate {
 		return 0;
 	}
 	
-	public static boolean InsertSolution(String parameters,String solutionid) {
+	public static boolean InsertSolution(String parameters,String solutionid,String solutionrank,String rankset) {
 		DBService helper=new DBService();
-		String sql="INSERT INTO ai_qanda.paramenter_solution (`parameterid`,`solutionid`) VALUES ('"+parameters+"',"+solutionid+");";
-		int rows=helper.executeUpdate(sql, null);
+		String sql="INSERT INTO ai_qanda.paramenter_solution (parameterid,solutionid,solutionrank,prametersranklist) VALUES (?,?,?,?);";
+		String[] paras={parameters,solutionid,solutionrank,rankset};
+		int rows=helper.executeUpdate(sql, paras);
 		if(rows==1){
 			return true;
 		}
