@@ -194,13 +194,15 @@ public class MyResource {
 					for(String item:minparameterArr){
 						for(int i=0;i<jsonObjectlist.size();i++){
 							ParameterDTO pdto=jsonObjectlist.get(i);
-							if(item==pdto.getId()){
-								if(i==0){
+							if(item.equals(pdto.getId())){
+								if(minparametersetstr.equals("")||minranksetstr.equals("")){
 									minparametersetstr=pdto.getId();
 									minranksetstr=pdto.getRank();
+									break;
 								}else {
 									minparametersetstr=minparametersetstr+","+pdto.getId();
 									minranksetstr=minranksetstr+","+pdto.getRank();
+									break;
 								}
 							}					
 						}
