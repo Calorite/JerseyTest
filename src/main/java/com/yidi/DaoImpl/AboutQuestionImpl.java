@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 
 import com.yidi.interfactoty.AboutQuestionDAO;
 import com.yidi.entity.Parameter;
+import com.yidi.entity.Question;
 import com.yidi.entity.UpperQuestion;
 
 
@@ -92,5 +93,56 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 			result.put(entry.getKey(), entry.getValue());
 		}
 		return result;
+	}
+
+	@Override
+	public List<Question> getQuestionlist(DBService helper) {
+		String sql="SELECT * FROM ai_qanda.paramenterques_tb;";
+		List<Question> quesitonlist=new LinkedList<>();
+		ResultSet rs;
+		rs=helper.executeQueryRS(sql, null);
+		try {
+			while(rs.next()){
+				Question newone=new Question(rs.getInt(1),rs.getString(2));
+				quesitonlist.add(newone);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return quesitonlist;
+	}
+
+	@Override
+	public boolean updateQuestionparametr(String questionid, String parameterid,String parameter) {
+		DBService helper=new DBService();
+		String sql="SELECT * FROM ai_qanda.paramenterques_tb where id=?";
+		String[] params= {questionid};
+		ResultSet rs=helper.executeQueryRS(sql, params);
+		int prechoice=0;
+		String preparameter="";
+		String prereturnid="";
+		try {
+			if (rs.next()) {
+				prechoice=rs.getInt(3);
+				preparameter=rs.getString(4);
+				prereturnid=rs.getString(5);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int newchoice=prechoice+1;
+		String newparameter=preparameter+","+parameter;
+		String newreturnid=prereturnid+","+parameterid;
+		try {
+			String sql1="UPDATE ai_qanda.paramenterques_tb SET chioces=?, answer=?, returnparameter=? WHERE id=?;";
+			String[] params2={String.valueOf(newchoice),newparameter,newreturnid,questionid};
+			helper.executeUpdate(sql1, params2);
+			return true;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return false;
 	}
 }

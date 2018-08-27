@@ -9,5 +9,5 @@ import com.yidi.entity.ReturnInfo;
 public interface TextInfoBytypeFactory {
 	ReturnInfo dog();
 	ReturnInfo cat();
-	ReturnInfo getReturnMSG(Map<Set<Integer>, Integer> parameter_solutionlist, Map<Integer, Parameter> parameters);
+	//ReturnInfo getReturnMSG(Map<Set<Integer>, Integer> parameter_solutionlist, Map<Integer, Parameter> parameters);
 }

@@ -1,5 +1,6 @@
 package com.yidi.DaoImpl;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.Map.Entry;
 
 
 import com.yidi.entity.Parameter;
+import com.yidi.entity.ParameterSolution;
 import com.yidi.entity.ReturnInfo;
 import com.yidi.interfactoty.AboutParametersDAO;
 import com.yidi.interfactoty.ParameterService;
@@ -41,7 +43,7 @@ public class ProcessFactoryImpl implements ParameterService {
 	}
 
 	@Override
-	public  Map<Integer, Parameter> getValidparameters(Map<Set<Integer>, Integer> parameterlist,Set<Parameter> initalset){
+	public  Map<Integer, Parameter> getValidparameters(Map<Set<Integer>, ParameterSolution> parameterlist,Set<Parameter> initalset){
 		Set<Integer> getedpara=new HashSet<>();
 		for (Parameter np:initalset) {
 			getedpara.add(np.getParameterid());
@@ -84,6 +86,8 @@ public class ProcessFactoryImpl implements ParameterService {
 	}
 
 
+	
+	
 
 	//降序
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValueDesc(Map<K, V> map) {
@@ -144,5 +148,38 @@ public class ProcessFactoryImpl implements ParameterService {
 		return null;
 	}
 
+
+	@Override
+	public int getquestionidbyparameterid(int id) {
+		DBService helper=new DBService();
+		String sql="SELECT quesid FROM ai_qanda.parameter_tb where id=?";
+		String[] params={String.valueOf(id)};
+		ResultSet rs=helper.executeQueryRS(sql, params);
+		try {
+			if(rs.next()){
+				return rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+
+	@Override
+	public String getquestionbyid(String id) {
+		DBService helper=new DBService();
+		String sql="SELECT question FROM ai_qanda.paramenterques_tb where id=?;";
+		String[] params={id};
+		ResultSet rs=helper.executeQueryRS(sql, params);
+		try {
+			if(rs.next()){
+				return rs.getString(1);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
 
 }

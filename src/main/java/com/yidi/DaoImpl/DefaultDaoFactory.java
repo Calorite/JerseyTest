@@ -21,15 +21,15 @@ public class DefaultDaoFactory implements DaoFactory {
 	}
 
 	@Override
-	public AboutQuestionDAO getquestiondao() {
+	public AboutQuestionDAO getquestiondao(DBService helper) {
 		// TODO Auto-generated method stub
 		return new AboutQuestionImpl();
 	}
 
 	@Override
-	public AboutSolutionDAO getsolution() {
+	public AboutSolutionDAO getsolution(DBService helper) {
 		// TODO Auto-generated method stub
-		return null;
+		return new AboutSolutionImpl();
 	}
 
 

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import com.yidi.Impl.Parama;
 import com.yidi.algorithm.Parama2Json;
 import com.yidi.entity.Parameter;
 import com.yidi.entity.ParameterDTO;
+import com.yidi.entity.Question;
 import com.yidi.entity.UpperQuestion;
 import com.yidi.entity.parameInQuestion;
 import com.yidi.interfactoty.AboutQuestionDAO;
@@ -44,8 +46,10 @@ import com.yidi.service.DefaultServiceFactory;
  */
 @Path("myresource")
 public class MyResource {
+	DBService helper=new DBService();
+	Gson gson=new Gson();
 	DefaultServiceFactory factory=new DefaultServiceFactory();
-	AboutQuestionDAO questiondao=factory.getquestionDao();
+	AboutQuestionDAO questiondao=factory.getquestionDao(helper);
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent
 	 * to the client as "text/plain" media type.
@@ -78,7 +82,23 @@ public class MyResource {
 		}
 	}
 
-
+	@Path("getquestionlist")
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)  //接受的参数类型为表单信息
+	@Produces({MediaType.APPLICATION_JSON})
+	public String getQuestions() throws IOException {
+		List<Question> questionlist=new LinkedList<>();
+		try{
+			questionlist=questiondao.getQuestionlist(helper);
+			String questionStr=gson.toJson(questionlist);
+			return questionStr;
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+		return "";
+	}
+	
+	
 	@Path("getparametes")
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)  //接受的参数类型为表单信息
@@ -125,7 +145,7 @@ public class MyResource {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)  //接受的参数类型为表单信息
 	@Produces({MediaType.APPLICATION_JSON})
 	public String getUpdateParameters(@FormParam("parametersJSON") String parametersjson) throws SQLException {	
-		Gson gson=new Gson();
+		
 		List<parameInQuestion> parameters=gson.fromJson(parametersjson, new TypeToken<List<parameInQuestion>>(){}.getType());
 		int count=0;
 		for(parameInQuestion pip:parameters){
@@ -236,9 +256,6 @@ public class MyResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String insertnewParameterANDQuestion(@FormParam("newparameter") String parameters,@FormParam("question") String solutionid,@FormParam("first") String firstid,@FormParam("second") String secondid) throws SQLException {	
 		try {
-			Gson gson=new Gson();
-			System.out.println(firstid);
-			System.out.println(secondid);
 			Map<String, String> returnmap=new HashMap<>();
 			AboutParameterImpl paImpl=new AboutParameterImpl();
 			Parameter parater=paImpl.insertParametergetID(parameters,firstid,secondid);
@@ -262,6 +279,20 @@ public class MyResource {
 		}
 		return "0";
 	}
+	
+	@Path("bundparametertoQuestion")
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)  //接受的参数类型为表单信息
+	@Produces({MediaType.APPLICATION_JSON})
+	public String AddparameterToquestion(@FormParam("newparameter") String parameter,@FormParam("questionid") String id,@FormParam("first") String firstid,@FormParam("second") String secondid) throws SQLException {
+		AboutParameterImpl paImpl=new AboutParameterImpl();		
+		Parameter parater=paImpl.insertParametergetID(parameter,firstid,secondid);
+		if(questiondao.updateQuestionparametr(id, String.valueOf(parater.getParameterid()), parameter)){
+			paImpl.updateParameterquestionid(parater.getParameterid(), Integer.valueOf(id));
+			return "true";
+		}
+		return "false";
+	}	
 	
 	
 	@Path("bundnewparameter")

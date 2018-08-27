@@ -6,12 +6,9 @@ public class Question {
 	private int chioces;
 	private String answer;
 	private String parameters;
-	public Question(int id,String question,int chioces,String answer,String parameters) {
+	public Question(int id,String question) {
 		this.id=id;
 		this.question=question;
-		this.chioces=chioces;
-		this.answer=answer;
-		this.parameters=parameters;
 	}
 	/**
 	 * @return the id

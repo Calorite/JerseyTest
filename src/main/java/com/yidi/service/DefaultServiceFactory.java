@@ -39,15 +39,15 @@ public class DefaultServiceFactory implements ServiceFactory {
 	}
 
 	@Override
-	public AboutQuestionDAO getquestionDao() {
+	public AboutQuestionDAO getquestionDao(DBService helper) {
 		// TODO Auto-generated method stub
-		return null;
+		return daoFactory.getquestiondao(helper);
 	}
 
 	@Override
-	public AboutSolutionDAO getsolutionDao() {
+	public AboutSolutionDAO getsolutionDao(DBService helper) {
 		// TODO Auto-generated method stub
-		return null;
+		return daoFactory.getsolution(helper);
 	}
 
 

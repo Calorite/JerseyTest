@@ -5,6 +5,7 @@ var newquestionmap=new Map();
 var newparameterid=0;
 var newquestionid=0;
 var newparameterlist=[];
+var questionlist=[];
 var solutionid=0;
 var nowquestionid=0;
 var nownewparameter='';
@@ -84,7 +85,7 @@ function showquestion(event){
 						url : "/JerseyTest/webapi/myresource/question",
 						data:{quesid:questionid},
 						success : function (data) {
-							$("#"+tagid).after("<li id="+questionid+" onclick='questionparameterfuc(event);'><button>"+data+"</button></li>")
+							$("#"+tagid).after("<li id="+questionid+" class='btn btn-default' onclick='questionparameterfuc(event);'><button>"+data+"</button></li>")
 						}
 					});					
 				}
@@ -117,7 +118,7 @@ function questionparameterfuc(event){
 						for(j = 0; j < obj.length; j++){
 							$("#tbl"+questid).append('<tr><td>'+obj[j].id+'</td><td contentEditable="true">'+obj[j].parameterinquestion+'</td><td contentEditable="true">'+obj[j].parameter+'</td></tr>');
 						}
-						$("#tbl"+questid).append("<button onclick='updateallfuc(event);'>更新</button>");
+						$("#tbl"+questid).append("<button class='btn btn-default' onclick='updateallfuc(event);'>更新</button>");
 					}
 				});
 				questionintag[questid]=true;
@@ -165,18 +166,59 @@ function shownewquestion(event){
 		$("#newquestion"+trid.replace('tr','')).remove();
 	}else{
 		$("#tr"+currenttrid).after('<div id=newquestion'+currenttrid+'>'
-				+'<div class="form-group">'
+				+'<div class="form-group leftitem">'
 				+'<label for="question">问题:</label>'
-				+'<textarea id="question'+trid.replace('tr','')+'" rows="3" cols="35"></textarea> >'
-				+'</div>'
+				+'<textarea id="question'+trid.replace('tr','')+'" rows="3" cols="35"></textarea>'			
 				+'<button class="btn btn-default" onclick="newques(event)">确定</button>'
+				+'</div>'
+				+'<div class="row-fluid leftitem">'
+				+'<span id="nowparameter" style="display:none">'+nownewparameter+'</span>'
+				+'<span class="help-inline">已有问题：</span> <select id="questionlist"'
+				+'class="selectpicker" data-show-subtext="true"'
+				+'data-live-search="true">'
+				+'</select>'
+				+'<button class="btn btn-default" onclick="questioninDB(event)">确定</button>'
+				+'</div>'
 				+'</div>');
 		newquestionmap[trid]=true;
+		var optionline=""
+		$.ajax({
+			type : "POST",
+			url : "/JerseyTest/webapi/myresource/getquestionlist",
+			data:{},
+			success : function (data) {
+				var datalist=data;
+				for (var i=0;i<datalist.length;i++) {
+					var quesid=datalist[i]["id"];
+					var questionstr=datalist[i]["question"];
+					optionline=optionline+'<option value="'+quesid+'">'+questionstr+'</option>';
+					
+				}
+				$("#questionlist").append(optionline)
+				$(".selectpicker" ).selectpicker('refresh'); 
+			}
+		});	
 	}
 }
 
-function dealfuc(event){
-	eventtag=event;
+function questioninDB(event){
+	var questionid=$('#questionlist option:selected') .val();
+	var thenewpara=$("#nowparameter").text();
+	var firstquestion=$("#firstselect  option:selected").val();
+	var secondquestion=$("#secondselect  option:selected").val();
+	$.ajax({
+		type : "POST",
+		url : "/JerseyTest/webapi/myresource/bundparametertoQuestion",
+		data:{newparameter:thenewpara,
+			questionid:questionid,
+			first:firstquestion,
+			second:secondquestion},
+		success : function (data) {
+			if(data){
+				alert("更新成功！");
+			}	
+		}
+	});	
 }
 
 function getnewparemeterid(parameter){
