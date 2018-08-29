@@ -6,15 +6,17 @@ public class Parameter {
 	private String parameter;
 	private String word;
 	private String targetparameitem;
+	private String upperquestion;
 	private int rank;
 	/**
 	 * @return the word
 	 */
-	public Parameter(int parameterid,int questionid,String parameter,int rank) {
+	public Parameter(int parameterid,int questionid,String parameter,int rank,String upper) {
 		this.parameterid=parameterid;
 		this.questionid=questionid;
 		this.parameter=parameter;
 		this.rank=rank;
+		this.upperquestion=upper;
 	}
 
 	public String getWord() {

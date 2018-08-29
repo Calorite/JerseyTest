@@ -1,25 +1,25 @@
 package com.yidi.entity;
 
 public class Question {
-	private int id;
+	private String id;
 	private String question;
 	private int chioces;
 	private String answer;
 	private String parameters;
-	public Question(int id,String question) {
+	public Question(String id,String question) {
 		this.id=id;
 		this.question=question;
 	}
 	/**
 	 * @return the id
 	 */
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	/**

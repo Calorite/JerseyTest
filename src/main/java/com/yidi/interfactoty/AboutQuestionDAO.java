@@ -12,6 +12,9 @@ import com.yidi.entity.UpperQuestion;
 
 public interface AboutQuestionDAO {
 	String getQustionStr(String id);
+	List<Question> getFirstQuestion();
+	List<Question> getSecendQuestion();
+	String answerQuestion(int id,String text);
 	List<Question> getQuestionlist(DBService helper);
 	int getQuestionid(Set<Integer> set1,Map<Integer,Parameter> allparamenter) throws SQLException;
 	boolean updateQuestionparametr(String questionid, String parameterid, String parameter);

@@ -12,4 +12,8 @@ public interface AboutParametersDAO {
 	boolean checkandpara(String para, String text);
 
 	String checkParameterLine(String parameline, String text);
+
+	Map<Integer, Parameter> getparams(String id1) throws SQLException;
+	
+	Map<Integer, Parameter> getparams2(String id2) throws SQLException;
 }

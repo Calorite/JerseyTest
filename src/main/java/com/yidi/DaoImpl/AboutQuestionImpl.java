@@ -103,7 +103,7 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 		rs=helper.executeQueryRS(sql, null);
 		try {
 			while(rs.next()){
-				Question newone=new Question(rs.getInt(1),rs.getString(2));
+				Question newone=new Question(String.valueOf(rs.getInt(1)),rs.getString(2));
 				quesitonlist.add(newone);
 			}
 		} catch (SQLException e) {
@@ -144,5 +144,45 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 			// TODO: handle exception
 		}
 		return false;
+	}
+
+	@Override
+	public String answerQuestion(int id, String text) {
+		String sql="";
+		return null;
+	}
+
+	@Override
+	public List<Question> getFirstQuestion() {
+		String sql="SELECT * FROM ai_qanda.upperquestion_tb where rank=1;";
+		DBService helper=new DBService();
+		List<Question> list1=new LinkedList<>();
+		ResultSet rs=helper.executeQueryRS(sql, null);
+		try {
+			while (rs.next()) {
+				list1.add(new Question(rs.getString(1),rs.getString(2)));
+			}
+			return list1;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
+	@Override
+	public List<Question> getSecendQuestion() {
+		String sql="SELECT * FROM ai_qanda.upperquestion_tb where rank=2;";
+		DBService helper=new DBService();
+		List<Question> list1=new LinkedList<>();
+		ResultSet rs=helper.executeQueryRS(sql, null);
+		try {
+			while (rs.next()) {
+				list1.add(new Question(rs.getString(1),rs.getString(2)));
+			}
+			return list1;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
 	}
 }

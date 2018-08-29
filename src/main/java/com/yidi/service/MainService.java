@@ -32,6 +32,7 @@ public class MainService implements TextInfoBytypeFactory {
 	private AboutParametersDAO parametersdao;
 	private AboutSolutionDAO solutiondao;
 	private AboutQuestionDAO questiondao;
+	Map<Integer, Parameter> initalparameters=new HashMap<>();
 	public MainService(String senderid,String tousr,String text) throws SQLException {
 		DefaultServiceFactory factory=new DefaultServiceFactory();
 		this.process=factory.getparameterService();
@@ -45,24 +46,66 @@ public class MainService implements TextInfoBytypeFactory {
 		if(text.contains("猫")) {
 
 		}else {
-			dog();
+			List<ReturnInfo> lastRecord=process.returnpassedrecord(1, senderid);
+			if (lastRecord.get(0).getStatus()==0) {//话题中...
+				ReturnInfo infotag=dog();
+				infotag.setRecieved(text);
+				infotag.setUsername(senderid);
+				if (process.insertReturnInfo(infotag)) {
+					
+				}else {
+					
+				}
+			}else{//新话题...
+				if(initalparameters.size()==0){//没有参数
+					//API
+				}else {
+					ReturnInfo infotag=dog();
+					infotag.setRecieved(text);
+					infotag.setUsername(senderid);
+					if (process.insertReturnInfo(infotag)) {
+						
+					}else {
+						
+					}
+				}				
+			}		
 		}
-
-
 	}
 
 	@Override
 	public ReturnInfo dog() {
 		try {
-			Map<Integer, Parameter> initalparameters=process.getInitialParameters(text,parametersdao);
+			String targetparamters="";
+			String targetparamters2="";
+			initalparameters=process.getInitialParameters(text,parametersdao);
 			Map<Set<Integer>, ParameterSolution> parameter_solutionlist=solutiondao.getsolutionlist();
-			getReturnMSG(parameter_solutionlist, initalparameters);
+			ReturnInfo infotag=getReturnMSG(parameter_solutionlist, initalparameters);
+			
 			Set<Parameter> initalparameterset=new HashSet<Parameter>();
 			for (int id:initalparameters.keySet()) {
+				if(targetparamters.equals("")){
+					targetparamters=String.valueOf(id);
+				}else {
+					targetparamters=targetparamters+","+String.valueOf(id);
+				}
 				initalparameterset.add(initalparameters.get(id));
 			}
+			infotag.setParameter(targetparamters);
+			if (infotag!=null) {
+				return infotag;
+			}
 			Map<Integer, Parameter> vaildparameters=process.getValidparameters(parameter_solutionlist, initalparameterset);
-			getReturnMSG(parameter_solutionlist, vaildparameters);
+			for (int id:vaildparameters.keySet()) {
+				if (targetparamters2.equals("")) {
+					targetparamters2=String.valueOf(id);
+				}else {
+					targetparamters2=targetparamters2+","+String.valueOf(id);
+				}
+			}
+			ReturnInfo infotag2=getReturnMSG(parameter_solutionlist, vaildparameters);
+			infotag2.setParameter(targetparamters2);
+			return infotag2;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

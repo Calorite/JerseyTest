@@ -21,12 +21,40 @@ public class AboutParameterImpl implements AboutParametersDAO {
 		String sql="SELECT * FROM ai_qanda.parameter_tb;";
 		rs=helper.executeQueryRS(sql, null);
 		while(rs.next()) {
-			Parameter p=new Parameter(rs.getInt(1),rs.getInt(2),rs.getString(4),rs.getInt(6));
+			Parameter p=new Parameter(rs.getInt(1),rs.getInt(2),rs.getString(4),rs.getInt(6),rs.getString(7));
 			allparamenters.put(rs.getInt(1), p);
 		}
 		return allparamenters;
 	}
 
+	@Override
+	public Map<Integer, Parameter> getparams(String id1) throws SQLException {
+		Map<Integer,Parameter> allparamenters=new HashMap<>();
+		ResultSet rs;
+		DBService helper=new DBService();
+		String sql="SELECT * FROM ai_qanda.parameter_tb where first="+id1+";";
+		rs=helper.executeQueryRS(sql, null);
+		while(rs.next()) {
+			Parameter p=new Parameter(rs.getInt(1),rs.getInt(2),rs.getString(4),rs.getInt(6),rs.getString(7));
+			allparamenters.put(rs.getInt(1), p);
+		}
+		return allparamenters;
+	}
+	
+	@Override
+	public Map<Integer, Parameter> getparams2(String id2) throws SQLException {
+		Map<Integer,Parameter> allparamenters=new HashMap<>();
+		ResultSet rs;
+		DBService helper=new DBService();
+		String sql="SELECT * FROM ai_qanda.parameter_tb where second="+id2+";";
+		rs=helper.executeQueryRS(sql, null);
+		while(rs.next()) {
+			Parameter p=new Parameter(rs.getInt(1),rs.getInt(2),rs.getString(4),rs.getInt(6),rs.getString(7));
+			allparamenters.put(rs.getInt(1), p);
+		}
+		return allparamenters;
+	}
+	
 	@Override
 	public boolean checkandpara(String para,String text) {
 		if(para.contains("&")) {
@@ -88,7 +116,7 @@ public class AboutParameterImpl implements AboutParametersDAO {
 			try {
 				if (rs.next()) {
 					int id=rs.getInt(1);
-					Parameter newparameter=new Parameter(id, 0, paramenter, 0);
+					Parameter newparameter=new Parameter(id, 0, paramenter, 0,first);
 					return newparameter;
 				}
 			} catch (SQLException e) {

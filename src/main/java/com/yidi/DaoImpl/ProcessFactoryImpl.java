@@ -2,12 +2,15 @@ package com.yidi.DaoImpl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +26,24 @@ import com.yidi.interfactoty.ParameterService;
 public class ProcessFactoryImpl implements ParameterService {
 	Map<Integer,Parameter> allparamenter=null;
 	@Override
-	public String returnpassedrecord(int rows) {
-		// TODO Auto-generated method stub
+	public List<ReturnInfo> returnpassedrecord(int rows,String usrname) {
+		List<ReturnInfo> list1=new LinkedList<>();
+		DBService helper=new DBService();
+		String sql="SELECT * FROM ai_qanda.user_dialogue_tb where username=? order by datetime desc limit "+String.valueOf(rows)+";";
+		String[] params={usrname};
+		ResultSet rs=helper.executeQueryRS(sql, params);
+		try {
+			while (rs.next()) {
+				ReturnInfo returninstance=new ReturnInfo(rs.getInt(5), rs.getInt(7), rs.getString(3));
+				returninstance.setDatetime(rs.getDate(4));
+				returninstance.setParameter(rs.getString(6));
+				returninstance.setRecieved(rs.getString(2));
+				list1.add(returninstance);
+			}
+			return list1;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		return null;
 	}
 
@@ -180,6 +199,51 @@ public class ProcessFactoryImpl implements ParameterService {
 			// TODO: handle exception
 		}
 		return null;
+	}
+
+
+	@Override
+	public boolean insertReturnInfo(ReturnInfo infoinstance) {
+		DBService helper=new DBService();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String datetime=df.format(new Date());
+		String sql="INSERT INTO ai_qanda.user_dialogue_tb (username,recevied,reply,datetime,replyid,parameters,type) values(?,?,?,?,?,?,?);";
+		String[] params={infoinstance.getUsername(),infoinstance.getRecieved(),infoinstance.getInfo(),datetime,String.valueOf(infoinstance.getId()),infoinstance.getParameter(),String.valueOf(infoinstance.getStatus())};
+		int rows=helper.executeUpdate(sql, params);
+		if (rows>0) {
+			return true;
+		}
+		return false;
+	}
+
+
+	@Override
+	public Set<Integer> getparametesbyUpperquestion(String id, String recevedmsg,AboutParametersDAO parametersdao) throws SQLException {
+		Set<Integer> set1=new HashSet<>();
+		Map<Integer,Parameter> FirstInparamenter=parametersdao.getparams(id);
+		for(Parameter curtparamente:FirstInparamenter.values()) {
+			String targetparame=parametersdao.checkParameterLine(curtparamente.getParameter(),recevedmsg);
+			if(targetparame!=null) {
+				curtparamente.setTargetparameitem(targetparame);
+				set1.add(curtparamente.getParameterid());
+			}
+		}
+		return set1;
+	}
+
+
+	@Override
+	public Set<Integer> getSecondquestion(String id, String recevedmsg,AboutParametersDAO parametersdao) throws SQLException {
+		Set<Integer> set2=new HashSet<>();
+		Map<Integer,Parameter> FirstInparamenter=parametersdao.getparams2(id);
+		for(Parameter curtparamente:FirstInparamenter.values()) {
+			String targetparame=parametersdao.checkParameterLine(curtparamente.getParameter(),recevedmsg);
+			if(targetparame!=null) {
+				curtparamente.setTargetparameitem(targetparame);
+				set2.add(curtparamente.getParameterid());
+			}
+		}
+		return set2;
 	}
 
 }
