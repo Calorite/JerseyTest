@@ -14,6 +14,6 @@ public class Main {
 		
 	}
 	public static void main(String[] args) throws SQLException {
-		MainService mainservice=new MainService("test", "", "没有");
+		MainService mainservice=new MainService("test", "", "狗狗吞咽困难");
 	}
 }

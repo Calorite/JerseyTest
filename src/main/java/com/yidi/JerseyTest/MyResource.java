@@ -36,6 +36,7 @@ import com.yidi.entity.ParameterDTO;
 import com.yidi.entity.Question;
 import com.yidi.entity.UpperQuestion;
 import com.yidi.entity.parameInQuestion;
+import com.yidi.interfactoty.AboutParametersDAO;
 import com.yidi.interfactoty.AboutQuestionDAO;
 import com.yidi.interfactoty.ParameterService;
 import com.yidi.service.DefaultServiceFactory;
@@ -50,6 +51,7 @@ public class MyResource {
 	Gson gson=new Gson();
 	DefaultServiceFactory factory=new DefaultServiceFactory();
 	AboutQuestionDAO questiondao=factory.getquestionDao(helper);
+	AboutParametersDAO parameterdao=factory.getparameterDao(helper);
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent
 	 * to the client as "text/plain" media type.
@@ -110,7 +112,7 @@ public class MyResource {
 				
 				ParameterService process=factory.getparameterService();
 				DBService helper=new DBService();
-				Map<Integer,Parameter> parametermap=process.getInitialParameters(text,factory.getparameterDao(factory.getDBhelper()));
+				Map<Integer,Parameter> parametermap=process.getInitialParameters(parameterdao.getparams(),text,factory.getparameterDao(factory.getDBhelper()));
 				Set<Parameter> initalparameterset=new HashSet<Parameter>();
 				for(Parameter p:parametermap.values()){
 					initalparameterset.add(p);

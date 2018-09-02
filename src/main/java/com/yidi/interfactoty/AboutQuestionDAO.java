@@ -12,6 +12,7 @@ import com.yidi.entity.UpperQuestion;
 
 public interface AboutQuestionDAO {
 	String getQustionStr(String id);
+	String getUpperquestionbyid(String id);
 	List<Question> getFirstQuestion();
 	List<Question> getSecendQuestion();
 	String answerQuestion(int id,String text);

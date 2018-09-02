@@ -1,16 +1,18 @@
 package com.yidi.entity;
 
 import java.util.Date;
+import java.util.Set;
 
 public class ReturnInfo {
-	private int id;
+	private String id;
 	private String username;
 	private int status;//1:solution
 	private String info;
 	private Date datetime;
 	private String recieved;
 	private String parameter;
-	public ReturnInfo(int id,int status,String info) {
+	private Set<Integer> uncheckparameter;
+	public ReturnInfo(String id,int status,String info) {
 		this.id=id;
 		this.status=status;
 		this.info=info;
@@ -19,13 +21,13 @@ public class ReturnInfo {
 	/**
 	 * @return the id
 	 */
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	/**
@@ -84,5 +86,20 @@ public class ReturnInfo {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+
+	/**
+	 * @return the uncheckparameter
+	 */
+	public Set<Integer> getUncheckparameter() {
+		return uncheckparameter;
+	}
+
+	/**
+	 * @param uncheckparameter the uncheckparameter to set
+	 */
+	public void setUncheckparameter(Set<Integer> uncheckparameter) {
+		this.uncheckparameter = uncheckparameter;
+	}
+
 
 }

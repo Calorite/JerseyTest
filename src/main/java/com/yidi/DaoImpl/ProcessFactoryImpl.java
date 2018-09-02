@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-
+import com.google.gson.Gson;
 import com.yidi.entity.Parameter;
 import com.yidi.entity.ParameterSolution;
 import com.yidi.entity.ReturnInfo;
@@ -24,7 +24,7 @@ import com.yidi.interfactoty.AboutParametersDAO;
 import com.yidi.interfactoty.ParameterService;
 
 public class ProcessFactoryImpl implements ParameterService {
-	Map<Integer,Parameter> allparamenter=null;
+
 	@Override
 	public List<ReturnInfo> returnpassedrecord(int rows,String usrname) {
 		List<ReturnInfo> list1=new LinkedList<>();
@@ -34,10 +34,21 @@ public class ProcessFactoryImpl implements ParameterService {
 		ResultSet rs=helper.executeQueryRS(sql, params);
 		try {
 			while (rs.next()) {
-				ReturnInfo returninstance=new ReturnInfo(rs.getInt(5), rs.getInt(7), rs.getString(3));
+				ReturnInfo returninstance=new ReturnInfo(rs.getString(5), rs.getInt(7), rs.getString(3));
 				returninstance.setDatetime(rs.getDate(4));
 				returninstance.setParameter(rs.getString(6));
 				returninstance.setRecieved(rs.getString(2));
+				String uncheck=rs.getString(8);
+				Set<Integer> set1=new HashSet<>();
+				if (uncheck.contains(",")) {
+					String[] uncheckarr=uncheck.split(",");
+					for(String thisone:uncheckarr){
+						set1.add(Integer.valueOf(thisone));
+					}
+				}else {
+					set1.add(Integer.valueOf(uncheck));
+				}
+				returninstance.setUncheckparameter(set1);
 				list1.add(returninstance);
 			}
 			return list1;
@@ -91,8 +102,8 @@ public class ProcessFactoryImpl implements ParameterService {
 	}
 
 	@Override
-	public Map<Integer,Parameter> getInitialParameters(String text,AboutParametersDAO parametersdao) throws SQLException{
-		allparamenter=parametersdao.getparams();
+	public Map<Integer,Parameter> getInitialParameters(Map<Integer,Parameter> allparamenter ,String text,AboutParametersDAO parametersdao) throws SQLException{
+
 		Map<Integer,Parameter> targetpara=new HashMap<Integer,Parameter>();
 		for(Parameter curtparamente:allparamenter.values()) {
 			String targetparame=parametersdao.checkParameterLine(curtparamente.getParameter(),text);
@@ -105,8 +116,8 @@ public class ProcessFactoryImpl implements ParameterService {
 	}
 
 
-	
-	
+
+
 
 	//降序
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValueDesc(Map<K, V> map) {
@@ -207,8 +218,16 @@ public class ProcessFactoryImpl implements ParameterService {
 		DBService helper=new DBService();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String datetime=df.format(new Date());
-		String sql="INSERT INTO ai_qanda.user_dialogue_tb (username,recevied,reply,datetime,replyid,parameters,type) values(?,?,?,?,?,?,?);";
-		String[] params={infoinstance.getUsername(),infoinstance.getRecieved(),infoinstance.getInfo(),datetime,String.valueOf(infoinstance.getId()),infoinstance.getParameter(),String.valueOf(infoinstance.getStatus())};
+		Gson gson=new Gson();
+		String sql="INSERT INTO ai_qanda.user_dialogue_tb (username,recevied,reply,datetime,replyid,parameters,type,uncheck) values(?,?,?,?,?,?,?,?);";
+		String upcheck=gson.toJson(infoinstance.getUncheckparameter());
+		String uncheck="";
+		try {
+			uncheck=upcheck.replace("[", "").replace("]", "");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		String[] params={infoinstance.getUsername(),infoinstance.getRecieved(),infoinstance.getInfo(),datetime,String.valueOf(infoinstance.getId()),infoinstance.getParameter(),String.valueOf(infoinstance.getStatus()),uncheck};
 		int rows=helper.executeUpdate(sql, params);
 		if (rows>0) {
 			return true;
@@ -244,6 +263,25 @@ public class ProcessFactoryImpl implements ParameterService {
 			}
 		}
 		return set2;
+	}
+
+
+	@Override
+	public Map<Integer, Parameter> parameterInupperquestion(String id) {
+		String sql="SELECT * FROM ai_qanda.parameter_tb where first=?;";
+		String[] params={id};
+		DBService helper=new DBService();
+		Map<Integer,Parameter> FirstInparamenter=new HashMap<>();
+		ResultSet rs=helper.executeQueryRS(sql, params);
+		try {
+			while (rs.next()) {
+				FirstInparamenter.put(rs.getInt(1), new Parameter(rs.getInt(1), rs.getInt(2), rs.getString(4), rs.getInt(6), rs.getString(7)));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

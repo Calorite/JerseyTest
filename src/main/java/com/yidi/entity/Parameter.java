@@ -89,4 +89,18 @@ public class Parameter {
 		this.rank = rank;
 	}
 
+	/**
+	 * @return the upperquestion
+	 */
+	public String getUpperquestion() {
+		return upperquestion;
+	}
+
+	/**
+	 * @param upperquestion the upperquestion to set
+	 */
+	public void setUpperquestion(String upperquestion) {
+		this.upperquestion = upperquestion;
+	}
+
 }

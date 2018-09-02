@@ -21,6 +21,8 @@ import com.yidi.entity.UpperQuestion;
 
 public class AboutQuestionImpl implements AboutQuestionDAO {
 
+	DBService helper=new DBService();
+
 	@Override
 	public String getQustionStr(String id) {
 		DBService helper=new DBService();
@@ -64,7 +66,7 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 		}
 		return quesitonlist;
 	}
-	
+
 	public static boolean updateBundparameter(String parameter,String questionid) {
 		DBService helper=new DBService();
 		String sql="UPDATE ai_qanda.paramenterques_tb SET returnparameter=? WHERE id=?;";
@@ -75,8 +77,8 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 		}
 		return false;
 	}
-	
-	
+
+
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
 
 		List<Entry<K,V>> sortedEntries = new ArrayList<Entry<K,V>>(map.entrySet());
@@ -155,7 +157,6 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 	@Override
 	public List<Question> getFirstQuestion() {
 		String sql="SELECT * FROM ai_qanda.upperquestion_tb where rank=1;";
-		DBService helper=new DBService();
 		List<Question> list1=new LinkedList<>();
 		ResultSet rs=helper.executeQueryRS(sql, null);
 		try {
@@ -172,7 +173,6 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 	@Override
 	public List<Question> getSecendQuestion() {
 		String sql="SELECT * FROM ai_qanda.upperquestion_tb where rank=2;";
-		DBService helper=new DBService();
 		List<Question> list1=new LinkedList<>();
 		ResultSet rs=helper.executeQueryRS(sql, null);
 		try {
@@ -182,6 +182,22 @@ public class AboutQuestionImpl implements AboutQuestionDAO {
 			return list1;
 		} catch (Exception e) {
 			// TODO: handle exception
+		}
+		return null;
+	}
+
+	@Override
+	public String getUpperquestionbyid(String id) {
+		String sql="SELECT question FROM ai_qanda.upperquestion_tb WHERE id=?;";
+		String[] params= {id};
+		ResultSet rs=helper.executeQueryRS(sql, params);
+		try {
+			if(rs.next()) {
+				return rs.getString(1);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return null;
 	}
